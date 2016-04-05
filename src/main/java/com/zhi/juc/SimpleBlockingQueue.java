@@ -9,44 +9,41 @@ import java.util.concurrent.locks.ReentrantLock;
  * @author gouqi<gouqi@2dfire.com>
  * @date 2016/3/28.
  */
-public class BlockingQueue<T> {
+public class SimpleBlockingQueue<T> {
 
-    private List<T> data;
+    private List<T> items;
     private final int size;
     private final ReentrantLock lock = new ReentrantLock();
     private final Condition emptyCondition = lock.newCondition();
     private final Condition fullCondition = lock.newCondition();
-    private int putNums;
 
-    public BlockingQueue(int size){
+    public SimpleBlockingQueue(int size) {
         this.size = size;
-        data = new ArrayList<T>(size);
+        items = new ArrayList<T>(size);
     }
 
     public void put(T v) throws InterruptedException {
         lock.lock();
-        try{
-            while(putNums == size){
+        try {
+            while (items.size() == size) {
                 fullCondition.await();
             }
-            data.add(v);
-            putNums++;
+            items.add(v);
             emptyCondition.signalAll();
-        }finally{
+        } finally {
             lock.unlock();
         }
     }
 
     public T take() throws InterruptedException {
         lock.lock();
-        try{
-            while(putNums == 0){
+        try {
+            while (items.size() == 0) {
                 emptyCondition.await();
             }
-            putNums--;
             fullCondition.signalAll();
-            return data.remove(0);
-        }finally{
+            return items.remove(0);
+        } finally {
             lock.unlock();
         }
     }
