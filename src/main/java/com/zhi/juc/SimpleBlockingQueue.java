@@ -10,7 +10,6 @@ import java.util.concurrent.locks.ReentrantLock;
  * @date 2016/3/28.
  */
 public class SimpleBlockingQueue<T> {
-
     private List<T> items;
     private final int size;
     private final ReentrantLock lock = new ReentrantLock();
