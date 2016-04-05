@@ -14,8 +14,8 @@ public class SimpleBlockingQueue<T> {
     private List<T> items;
     private final int size;
     private final ReentrantLock lock = new ReentrantLock();
-    private final Condition emptyCondition = lock.newCondition();
-    private final Condition fullCondition = lock.newCondition();
+    private final Condition notEmpty = lock.newCondition();
+    private final Condition notFull = lock.newCondition();
 
     public SimpleBlockingQueue(int size) {
         this.size = size;
@@ -26,10 +26,10 @@ public class SimpleBlockingQueue<T> {
         lock.lock();
         try {
             while (items.size() == size) {
-                fullCondition.await();
+                notFull.await();
             }
             items.add(v);
-            emptyCondition.signalAll();
+            notEmpty.signalAll();
         } finally {
             lock.unlock();
         }
@@ -39,9 +39,9 @@ public class SimpleBlockingQueue<T> {
         lock.lock();
         try {
             while (items.size() == 0) {
-                emptyCondition.await();
+                notEmpty.await();
             }
-            fullCondition.signalAll();
+            notFull.signalAll();
             return items.remove(0);
         } finally {
             lock.unlock();
